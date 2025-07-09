@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
-import { leaveRoom, startGame } from "../services/api.jsx";
+import { useState, useEffect } from "react";
+import { leaveRoom } from "../services/api.jsx";
+import { subscribeToGameUpdates, startGameViaWebSocket, joinRoomViaWebSocket, cleanupAllSubscriptions } from "../services/socket.jsx";
 
 export function RoomModal() {
   const navigate = useNavigate();
@@ -10,6 +11,63 @@ export function RoomModal() {
   const room = location.state?.room;
 
   const [loading, setLoading] = useState(false);
+  const [gameStarting, setGameStarting] = useState(false);
+  const [shouldCleanup, setShouldCleanup] = useState(true);
+
+  useEffect(() => {
+    if (!room) return;
+
+    const handleRoomUpdates = (data) => {
+      console.log('RoomModal recebeu update:', data);
+
+      if (data.type === 'game_started') {
+        console.log('Jogo iniciado! Dados recebidos:', data.data);
+        setGameStarting(true);
+        setShouldCleanup(false);
+
+        setTimeout(() => {
+          const gameData = data.data;
+
+          console.log('Navegando para /game com dados:', {
+            player,
+            room,
+            game: gameData
+          });
+
+          navigate("/game", {
+            state: {
+              player,
+              room,
+              game: gameData
+            }
+          });
+        }, 1000);
+      }
+
+      if (data.type === 'player_joined') {
+        console.log('👤 Jogador entrou na sala:', data.data.player);
+      }
+    };
+
+
+    const channel = subscribeToGameUpdates(room.id, player?.id, handleRoomUpdates);
+
+    if (channel && player?.id) {
+      setTimeout(() => {
+        console.log(`Tentando entrar na sala ${room.id} com jogador ${player.id}`);
+        joinRoomViaWebSocket(room.id, player.id);
+      }, 1500);
+    }
+
+    return () => {
+      if (shouldCleanup) {
+        console.log(`Limpando conexões WebSocket do RoomModal`);
+        cleanupAllSubscriptions();
+      } else {
+        console.log(`Mantendo conexões WebSocket para o GameModal`);
+      }
+    };
+  }, [room, player, navigate]);
 
   const handleLeaveRoom = async () => {
     setLoading(true);
@@ -25,14 +83,11 @@ export function RoomModal() {
     }
   };
 
-  const handleStartGame = async () => {
+  const handleStartGame = async (room, player) => {
     setLoading(true);
     try {
-      const game = await startGame(room.id);
-      alert("Jogo iniciado com sucesso!");
-      navigate("/game", { state: { player, room, game } });
+      startGameViaWebSocket(room.id, player);
     } catch (error) {
-      alert("Erro ao iniciar o jogo: " + error.message);
       console.error(error);
     } finally {
       setLoading(false);
@@ -43,11 +98,31 @@ export function RoomModal() {
     return <p style={styles.errorText}>Dados da sala ou do jogador não encontrados.</p>;
   }
 
+  if (gameStarting) {
+    return (
+      <div style={styles.gameStartingContainer}>
+        <h2 style={styles.gameStartingText}>🎮 Jogo iniciado!</h2>
+        <p style={styles.gameStartingSubtext}>Redirecionando para o jogo...</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <header style={styles.header}>
         <h1 style={styles.roomName}>Sala: {room.name}</h1>
         <p style={styles.playerName}>Jogador: {player.name}</p>
+        <div style={styles.playersInfo}>
+          <p style={styles.playersCount}>
+            Jogadores na sala: {room.players?.length || 0}/{room.max_players || 2}
+          </p>
+          {room.players && room.players.length > 1 && (
+            <p style={styles.readyToPlay}>Pronto para jogar!</p>
+          )}
+          {room.players && room.players.length === 1 && (
+            <p style={styles.waitingForPlayers}>Aguardando outros jogadores...</p>
+          )}
+        </div>
       </header>
 
       <div style={styles.buttonsContainer}>
@@ -60,7 +135,7 @@ export function RoomModal() {
         </button>
 
         <button
-          onClick={handleStartGame}
+          onClick={() => handleStartGame(room, player)}
           style={{ ...styles.actionButton, cursor: loading ? "default" : "pointer", pointerEvents: loading ? "none" : "auto" }}
           disabled={loading}
         >
@@ -91,6 +166,31 @@ const styles = {
     fontSize: 18,
     color: "#00d0ff",
   },
+  playersInfo: {
+    marginTop: 15,
+    padding: "10px",
+    backgroundColor: "rgba(0, 208, 255, 0.1)",
+    borderRadius: "8px",
+    border: "1px solid #00d0ff",
+  },
+  playersCount: {
+    margin: 0,
+    fontSize: 14,
+    color: "#00d0ff",
+    fontWeight: "bold",
+  },
+  readyToPlay: {
+    margin: "5px 0 0 0",
+    fontSize: 14,
+    color: "#4CAF50",
+    fontWeight: "bold",
+  },
+  waitingForPlayers: {
+    margin: "5px 0 0 0",
+    fontSize: 14,
+    color: "#ffa500",
+    fontWeight: "bold",
+  },
   buttonsContainer: {
     display: "flex",
     gap: 20,
@@ -117,5 +217,29 @@ const styles = {
     textAlign: "center",
     marginTop: 50,
     fontFamily: "Arial, sans-serif",
+  },
+  gameStartingContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "40px",
+    backgroundColor: "rgba(0, 208, 255, 0.1)",
+    borderRadius: "12px",
+    border: "2px solid #00d0ff",
+  },
+  gameStartingText: {
+    fontSize: "28px",
+    color: "#00d0ff",
+    margin: 0,
+    fontFamily: "Arial, sans-serif",
+    textAlign: "center",
+  },
+  gameStartingSubtext: {
+    fontSize: "16px",
+    color: "#00d0ff",
+    marginTop: "10px",
+    fontFamily: "Arial, sans-serif",
+    textAlign: "center",
   },
 };

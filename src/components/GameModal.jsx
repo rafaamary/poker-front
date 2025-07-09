@@ -13,18 +13,25 @@ export function GameModal() {
     gameState.currentPlayer === player.id ||
     (!gameState.currentPlayer && !playersWhoActed.includes(player.id));
 
-  const currentPlayer = game.initial_state.players.find((p) => p.id === player.id);
+  const currentPlayer = game?.initial_state?.players?.find((p) => p.id === player.id) || {
+    id: player.id,
+    name: player.name,
+    chips: 1000,
+    cards: []
+  };
 
-  if (!gameState.players.find((p) => p.id === player.id)) {
-    gameState.players.push({
+  let yourPlayer = gameState.players.find((p) => p.id === player.id);
+
+  if (!yourPlayer) {
+    yourPlayer = {
       id: player.id,
       name: player.name,
-      chips: 1000,
-      cards: currentPlayer.cards,
-    });
+      chips: currentPlayer?.chips || 1000,
+      cards: currentPlayer?.cards || [],
+      status: 'active'
+    };
+    gameState.players.push(yourPlayer);
   }
-
-  const yourPlayer = gameState.players.find((p) => p.id === player.id);
 
   return (
     <>
@@ -46,7 +53,7 @@ export function GameModal() {
             {Array(5 - (gameState.communityCards?.length || 0))
               .fill(0)
               .map((_, i) => (
-                <div key={`empty-${i}`} style={styles.emptyCardSlot}></div>
+                <Card key={i} value='back' />
               ))}
           </div>
         </div>
@@ -72,28 +79,44 @@ export function GameModal() {
 
           <div style={styles.actions}>
             <button
-              style={{ ...styles.actionButton, ...styles.checkButton }}
+              style={{
+                ...styles.actionButton,
+                ...styles.button,
+                ...(isYourTurn ? {} : styles.disabledButton)
+              }}
               disabled={!isYourTurn}
               onClick={() => sendAction('check')}
             >
               CHECK
             </button>
             <button
-              style={{ ...styles.actionButton, ...styles.betButton }}
+              style={{
+                ...styles.actionButton,
+                ...styles.button,
+                ...(isYourTurn ? {} : styles.disabledButton)
+              }}
               disabled={!isYourTurn}
               onClick={() => sendAction('raise', 50)}
             >
               RAISE
             </button>
             <button
-              style={{ ...styles.actionButton, ...styles.foldButton }}
+              style={{
+                ...styles.actionButton,
+                ...styles.button,
+                ...(isYourTurn ? {} : styles.disabledButton)
+              }}
               disabled={!isYourTurn}
               onClick={() => sendAction('fold')}
             >
               FOLD
             </button>
             <button
-              style={{ ...styles.actionButton, ...styles.callButton }}
+              style={{
+                ...styles.actionButton,
+                ...styles.button,
+                ...(isYourTurn ? {} : styles.disabledButton)
+              }}
               disabled={!isYourTurn}
               onClick={() => sendAction('call')}
             >
@@ -232,19 +255,17 @@ const styles = {
     minWidth: '80px',
     cursor: 'pointer',
     textTransform: 'uppercase',
-    transition: 'background-color 0.3s ease',
+    transition: 'all 0.3s ease',
   },
-  checkButton: {
+  button: {
+    backgroundColor: '#4CAF50',
     color: '#fff',
   },
-  betButton: {
-    color: '#fff',
-  },
-  foldButton: {
-    color: '#fff',
-  },
-  callButton: {
-    color: '#fff',
+  disabledButton: {
+    backgroundColor: '#333',
+    color: '#777',
+    cursor: 'not-allowed',
+    opacity: 0.5,
   },
   gameMessage: {
     position: 'absolute',
@@ -256,5 +277,29 @@ const styles = {
     fontStyle: 'italic',
     textAlign: 'center',
     zIndex: 10,
+  },
+  errorContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100vh',
+    backgroundColor: '#1a1a1a',
+    color: '#ff6b6b',
+    fontSize: '16px',
+    padding: '20px',
+    textAlign: 'center',
+  },
+  loadingContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100vh',
+    backgroundColor: '#1a1a1a',
+    color: '#00d0ff',
+    fontSize: '16px',
+    padding: '20px',
+    textAlign: 'center',
   },
 };
