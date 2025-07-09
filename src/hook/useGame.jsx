@@ -14,9 +14,7 @@ export function useGame({ player, room }) {
     if (!room) return;
 
     const currentPhase = room.gamePhase || 'pre-flop';
-    console.log("Current game phase:", currentPhase);
     const pot = gameState?.pot + gameState?.lastAction?.amount;
-    console.log("Current pot amount:", pot);
 
     setGameState({
       roomId: room.id,
@@ -30,7 +28,6 @@ export function useGame({ player, room }) {
     });
 
     const handleGameUpdate = (data) => {
-      console.log("Game update received:", data);
       setGameState(prevState => ({
         ...prevState,
         ...data.game_state,
@@ -86,11 +83,9 @@ export function useGame({ player, room }) {
 
         setTimeout(async () => {
           try {
-            console.log(currentPhase === 'river')
+            (currentPhase === 'river')
             if (currentPhase === 'river') {
               const response = await endGame(room.id);
-
-              console.log("Fim do jogo:", response);
 
               setGameState(prev => ({
                 ...prev,
@@ -98,7 +93,7 @@ export function useGame({ player, room }) {
                 communityCards: response.community_cards || [],
               }));
 
-              navigate(`/inicio`, { state: { room } });
+              navigate(`/inicio`, { state: { player } });
             } else {
               const response = await nextPhase(room.id);
 

@@ -5,7 +5,6 @@ import { CreateRoomModal } from './components/CreateRoomModal.jsx'
 import './App.css'
 import { RoomModal } from './components/RoomModal.jsx'
 import { GameModal } from './components/GameModal.jsx'
-import { WinnerScreen } from './components/WinnerScreen.jsx'
 
 function App() {
   return (
@@ -16,7 +15,6 @@ function App() {
         <Route path="/criar-sala" element={<CreateRoomModal />} />
         <Route path="/sala" element={<RoomModal />} />
         <Route path="/game" element={<GameModal />} />
-        <Route path="/end" element={<WinnerScreen />} />
       </Routes>
     </BrowserRouter>
   )

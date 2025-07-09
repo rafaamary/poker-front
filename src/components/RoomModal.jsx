@@ -40,18 +40,20 @@ export function RoomModal() {
   };
 
   if (!player || !room) {
-    return <p>Dados da sala ou do jogador não encontrados.</p>;
+    return <p style={styles.errorText}>Dados da sala ou do jogador não encontrados.</p>;
   }
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Sala: {room.name}</h1>
-      <p>Jogador: {player.name}</p>
+    <>
+      <header style={styles.header}>
+        <h1 style={styles.roomName}>Sala: {room.name}</h1>
+        <p style={styles.playerName}>Jogador: {player.name}</p>
+      </header>
 
-      <div style={{ marginTop: 20, display: "flex", gap: 10 }}>
+      <div style={styles.buttonsContainer}>
         <button
           onClick={handleLeaveRoom}
-          style={{ ...buttonStyle, backgroundColor: "#888" }}
+          style={{ ...styles.actionButton, backgroundColor: "#888", cursor: loading ? "default" : "pointer", pointerEvents: loading ? "none" : "auto" }}
           disabled={loading}
         >
           Sair da Sala
@@ -59,21 +61,61 @@ export function RoomModal() {
 
         <button
           onClick={handleStartGame}
-          style={buttonStyle}
+          style={{ ...styles.actionButton, cursor: loading ? "default" : "pointer", pointerEvents: loading ? "none" : "auto" }}
           disabled={loading}
         >
           {loading ? "Processando..." : "Iniciar Jogo"}
         </button>
       </div>
-    </div>
+    </>
   );
 }
 
-const buttonStyle = {
-  padding: "10px 20px",
-  borderRadius: 6,
-  border: "none",
-  backgroundColor: "red",
-  color: "white",
-  cursor: "pointer",
+const styles = {
+  header: {
+    textAlign: "center",
+    marginBottom: 40,
+    borderBottom: "2px solid #00d0ff",
+    paddingBottom: 12,
+    width: "100%",
+    maxWidth: 400,
+  },
+  roomName: {
+    margin: 0,
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#00d0ff",
+  },
+  playerName: {
+    marginTop: 6,
+    fontSize: 18,
+    color: "#00d0ff",
+  },
+  buttonsContainer: {
+    display: "flex",
+    gap: 20,
+    width: "100%",
+    maxWidth: 400,
+    justifyContent: "center",
+  },
+  actionButton: {
+    flex: 1,
+    padding: "14px 0",
+    fontSize: 16,
+    fontWeight: "bold",
+    borderRadius: 8,
+    border: "none",
+    cursor: "pointer",
+    textTransform: "uppercase",
+    backgroundColor: "#00d0ff",
+    color: "#fff",
+    transition: "background-color 0.3s ease",
+  },
+  errorText: {
+    fontSize: 16,
+    color: "#ff4444",
+    textAlign: "center",
+    marginTop: 50,
+    fontFamily: "Arial, sans-serif",
+  },
 };

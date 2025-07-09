@@ -17,7 +17,7 @@ export function Home() {
     fetchRooms();
   }, []);
 
-  const handleCreateRoom = () => {
+  const handleCreateRoom = (player) => {
     navigate("/criar-sala", { state: { player } });
   };
 
@@ -45,33 +45,33 @@ export function Home() {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Bem-vindo, {player?.name || "jogador"}!</h1>
+    <>
+      <h1 style={styles.title}>Bem-vindo, {player?.name || "jogador"}!</h1>
 
-      <button
-        onClick={handleDeletePlayer}
-        style={{ ...buttonStyle, backgroundColor: "gray" }}
-      >
-        Excluir Jogador
-      </button>
+      <div style={styles.buttonsRow}>
+        <button
+          onClick={handleDeletePlayer}
+          style={{ ...styles.button, backgroundColor: "#666" }}
+        >
+          Excluir Jogador
+        </button>
 
-      <div style={{ marginTop: 20 }}>
-        <button onClick={handleCreateRoom} style={buttonStyle}>
+        <button onClick={() => handleCreateRoom(player)} style={styles.button}>
           Criar Sala
         </button>
       </div>
 
-      <h2 style={{ marginTop: 40 }}>Salas existentes:</h2>
+      <h2 style={styles.subtitle}>Salas existentes:</h2>
       {rooms.length === 0 ? (
-        <p>Nenhuma sala encontrada.</p>
+        <p style={styles.noRoomsText}>Nenhuma sala encontrada.</p>
       ) : (
-        <ul>
+        <ul style={styles.roomList}>
           {rooms.map((room) => (
-            <li key={room.id} style={{ marginBottom: 10 }}>
+            <li key={room.id} style={styles.roomItem}>
               <span>{room.name}</span>
               <button
                 onClick={() => handleEnterRoom(room, player)}
-                style={{ ...buttonStyle, marginLeft: 10 }}
+                style={{ ...styles.button, marginLeft: 10, padding: "6px 16px" }}
               >
                 Entrar
               </button>
@@ -79,15 +79,60 @@ export function Home() {
           ))}
         </ul>
       )}
-    </div>
+    </>
   );
 }
 
-const buttonStyle = {
-  padding: "10px 20px",
-  borderRadius: 6,
-  border: "none",
-  backgroundColor: "red",
-  color: "white",
-  cursor: "pointer",
+const styles = {
+  title: {
+    fontSize: 28,
+    marginBottom: 20,
+    color: "#00d0ff",
+    textAlign: "center",
+  },
+  buttonsRow: {
+    display: "flex",
+    gap: 16,
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  subtitle: {
+    marginTop: 40,
+    marginBottom: 10,
+    fontSize: 22,
+    color: "#00d0ff",
+    borderBottom: "2px solid #00d0ff",
+    paddingBottom: 6,
+  },
+  noRoomsText: {
+    fontStyle: "italic",
+    color: "#ccc",
+    textAlign: "center",
+  },
+  roomList: {
+    listStyle: "none",
+    padding: 0,
+  },
+  roomItem: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#112d4e",
+    padding: "10px 15px",
+    borderRadius: 8,
+    marginBottom: 12,
+    fontSize: 18,
+  },
+  button: {
+    padding: "10px 24px",
+    borderRadius: 8,
+    border: "none",
+    backgroundColor: "#00d0ff",
+    color: "white",
+    cursor: "pointer",
+    fontWeight: "bold",
+    fontSize: 16,
+    textTransform: "uppercase",
+    transition: "background-color 0.3s ease",
+  },
 };

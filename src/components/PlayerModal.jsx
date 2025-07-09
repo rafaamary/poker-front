@@ -28,7 +28,7 @@ export function PlayerModal() {
   };
 
   return (
-    <div style={styles.overlay}>
+    <>
       <div style={styles.modal}>
         <h2 style={styles.h2}>Qual o seu nome?</h2>
         <input
@@ -48,47 +48,53 @@ export function PlayerModal() {
         </button>
         {error && <p style={{ color: "red", marginTop: 10 }}>{error}</p>}
       </div>
-    </div>
+    </>
   );
 }
 
 const styles = {
-  overlay: {
-    position: "fixed",
-    inset: 0,
-    background: "rgba(255, 255, 255, 0.6)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  modal: {
-    background: "white",
-    padding: 20,
-    borderRadius: 8,
+modal: {
+    background: "#112d4e",
+    padding: 24,
+    borderRadius: 12,
     display: "flex",
     flexDirection: "column",
-    gap: 10,
-    width: 300,
-  },
-  input: {
-    padding: 10,
-    borderRadius: 4,
-    border: "1px solid #ccc",
-    background: "white",
-    color: "black",
+    gap: 16,
+    width: 320,
+    boxShadow: "0 0 15px rgba(0, 0, 0, 0.4)",
+    color: "#fff",
   },
   h2: {
     margin: 0,
-    fontSize: 20,
+    fontSize: 22,
     textAlign: "center",
-    color: "red",
+    color: "#00d0ff",
+  },
+  input: {
+    padding: 12,
+    borderRadius: 8,
+    border: "1px solid #2a5d8f",
+    background: "#1a3a6d",
+    color: "white",
+    fontSize: 16,
+    outline: "none",
   },
   button: {
-    padding: 10,
-    borderRadius: 4,
+    padding: 12,
+    borderRadius: 8,
     border: "none",
-    background: "red",
+    backgroundColor: "#00d0ff",
     color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
     cursor: "pointer",
+    textTransform: "uppercase",
+    transition: "background-color 0.3s ease",
+  },
+  errorText: {
+    color: "#ff6b6b",
+    fontWeight: "600",
+    textAlign: "center",
+    marginTop: 10,
   },
 };
