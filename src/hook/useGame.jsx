@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
-import { actionGame, nextPhase, endGame } from "../services/api.jsx";
 import { subscribeToGameUpdates, requestGameState, sendActionViaWebSocket, cleanupAllSubscriptions } from "../services/socket.jsx";
-import { useNavigate } from "react-router-dom";
-import { allPlayersActed, validateAction } from "../utils/gameLogic.js";
+import { validateAction } from "../utils/gameLogic.js";
 
 export function useGame({ player, room, game }) {
   const [gameState, setGameState] = useState(null);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
-  const navigate = useNavigate();
   const [playersWhoActed, setPlayersWhoActed] = useState(new Set());
 
   useEffect(() => {
